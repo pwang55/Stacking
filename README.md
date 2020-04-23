@@ -2,10 +2,10 @@
 
 **`make_list.sh`** makes the lists containing science frames to be stacked (ex: list_1ne.txt)
 
-`**individual_stack.sh**` takes list created from above (ex: list_1ne.txt) and make stacked image.
+**`individual_stack.sh`** takes list created from above (ex: list_1ne.txt) and make stacked image.
 Output format will be stack_(clustername)_1ne.fits and it's weight image.
 
-`**master_stack.sh**` takes masterlist.txt containing all stacked image, create a master stacked image.
+**`master_stack.sh`** takes masterlist.txt containing all stacked image, create a master stacked image.
 The master stacked image is crucial for photometry analysis.
 
 ---------------------------------------------------------------
@@ -22,6 +22,7 @@ In files folder:
 
 `$ path_to_script/./make_list.sh [cluster_name]`
 
+---------------------------------------------------------------
 
 **individual_stack.sh:**
 
@@ -77,6 +78,7 @@ Options(case insensitive):
 	-subtractbackground=Y		SWarp will subtract background (N will not). Default Y
 ```
 
+---------------------------------------------------------------
 
 **master_stack.sh:**
 
