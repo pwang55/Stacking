@@ -1,50 +1,47 @@
 
 
-`make_list.sh` makes the lists containing science frames to be stacked (ex: list_1ne.txt)
+**make_list.sh** makes the lists containing science frames to be stacked (ex: list_1ne.txt)
 
-`individual_stack.sh` takes list created from above (ex: list_1ne.txt) and make stacked image.
+**individual_stack.sh** takes list created from above (ex: list_1ne.txt) and make stacked image.
 Output format will be stack_(clustername)_1ne.fits and it's weight image.
 
-`master_stack.sh` takes masterlist.txt containing all stacked image, create a master stacked image.
+**master_stack.sh** takes masterlist.txt containing all stacked image, create a master stacked image.
 The master stacked image is crucial for photometry analysis.
 
 ---------------------------------------------------------------
 
 Each Usage:
 
-`masterlist.sh`:
+**masterlist.sh:**
+
+In script folder:
+
+`$ ./make_list.sh [path_to_files] [cluster_name]`
+
+In files folder:
+
+`$ path_to_script/./make_list.sh [cluster_name]`
 
 
-        In script folder:
+**individual_stack.sh:**
 
-        `$ ./make_list.sh [path_to_files] [cluster_name]`
+In script folder:
 
-        In files folder:
+`$ ./individual_stack.sh path_to_files/list_1ne.txt (-option1) (-option2) ...`
 
-        `$ path_to_script/./make_list.sh [cluster_name]`
+In script folder running for loop, path_to_file needs to be provided
 
+```
+$ for files in `cat path_to_file/listoflist.txt`; do
+> ./individual_stack.sh $files [path_to_file] (-option1) (-option2) ...
+> done
+```
 
+In files folder:
 
-`individual_stack.sh`:
+`$ path_to_script/./individual_stack.sh list_1ne.txt (-option1) (-option2) ...`
 
-
-        In script folder:
-
-	`$ ./individual_stack.sh path_to_files/list_1ne.txt (-option1) (-option2) ...`
-
-        In script folder running for loop, path_to_file needs to be provided
-
-	```
-        $ for files in `cat path_to_file/listoflist.txt`; do
-	> ./individual_stack.sh $files [path_to_file] (-option1) (-option2) ...
-        > done
-	```
-
-        In files folder:
-
-        `$ path_to_script/./individual_stack.sh list_1ne.txt (-option1) (-option2) ...`
-
-	Options(case insensitive):
+Options(case insensitive):
 
 ```
 	-doc | -h | -help		Print doc and exit.
