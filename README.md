@@ -1,11 +1,11 @@
 
 
-**make_list.sh** makes the lists containing science frames to be stacked (ex: list_1ne.txt)
+`**make_list.sh**` makes the lists containing science frames to be stacked (ex: list_1ne.txt)
 
-**individual_stack.sh** takes list created from above (ex: list_1ne.txt) and make stacked image.
+`**individual_stack.sh**` takes list created from above (ex: list_1ne.txt) and make stacked image.
 Output format will be stack_(clustername)_1ne.fits and it's weight image.
 
-**master_stack.sh** takes masterlist.txt containing all stacked image, create a master stacked image.
+`**master_stack.sh**` takes masterlist.txt containing all stacked image, create a master stacked image.
 The master stacked image is crucial for photometry analysis.
 
 ---------------------------------------------------------------
@@ -78,19 +78,17 @@ Options(case insensitive):
 ```
 
 
-`master_stack.sh`:
+**master_stack.sh:**
 
-        In script folder:
+In script folder:
+`$ ./master_stack.sh path_to_files/masterlist.txt (-option1) (-option2) ...`
 
-        `$ ./master_stack.sh path_to_files/masterlist.txt (-option1) (-option2) ...`
+In files folder:
+`$ path_to_script/./master_stack.sh masterlist.txt (-option1) (-option2) ...`
 
-        In files folder:
+You need to reate masterlist.txt yourself.
 
-        `$ path_to_script/./master_stack.sh masterlist.txt (-option1) (-option2) ...`
-
-	You need to reate masterlist.txt yourself.
-
-	Options (case insensitive):
+Options (case insensitive):
 
 ```
         -doc | -h | -help               Print doc and exit.
