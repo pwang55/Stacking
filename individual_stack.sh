@@ -1,14 +1,87 @@
 #!/bin/bash
 
+
+usage='
+
+Usage:
+
+        In script folder:
+	$ ./individual_stack.sh path_to_files/list_1ne.txt (option1) (option2) ...
+
+        In script folder running for loop, path_to_file needs to be provided
+        $ for files in `cat path_to_file/listoflist.txt`; do
+	> ./individual_stack.sh $files [path_to_file] (option1) (option2) ...
+        > done
+
+        In files folder:
+        $ path_to_script/./individual_stack.sh list_1ne.txt (option1) (option2) ...
+
+This script stack files listed in the input list (ex: list_1ne.txt). 
+The list file (ex: list_1ne.txt) has to be the first argument. All others are interchangeable.
+
+Optional arguments are (case insensitive):
+
+	-------------------------------------------------------------------------------------------------------
+	doc					Print doc and exit.
+	-doc
+	help
+	-help
+	--help
+	-h
+	-------------------------------------------------------------------------------------------------------
+	scamp=true 				Run SCAMP, default=true
+	-scamp=true
+	-------------------------------------------------------------------------------------------------------
+	scamp=false				Skip SCAMP
+	-scamp=false
+	-------------------------------------------------------------------------------------------------------
+	SCAMP_CATALOG_AHEAD=ALLWISE		Catalog for first time running SCAMP with LOOSE mosaic type.
+	-SCAMP_CATALOG_AHEAD=ALLWISE		Should be from SCAMP options. Default here is ALLWISE
+	-------------------------------------------------------------------------------------------------------
+	SCAMP_CATALOG=ALLWISE			Catalog for running SCAMP after LOOSE, now with SAME_CRVAL.
+	-SCAMP_CATALOG=ALLWISE			Default is ALLWISE
+	-------------------------------------------------------------------------------------------------------
+	combine_type=WEIGHTED			Stacking combine type. Default is weighted stack.
+	-combine_type=WEIGHTED
+	-------------------------------------------------------------------------------------------------------
+	POS_MERR_AHEAD=5.0			Max position uncertainty for SCAMP in LOOSE mosaic type run
+	-POS_MERR_AHEAD=5.0			(arcmin)
+	-------------------------------------------------------------------------------------------------------
+	POS_MERR1=10.0				Max position uncertainty for SCAMP in first SAME_CRVAL run
+	-POS_MERR1=10.0				(arcmin)
+	-------------------------------------------------------------------------------------------------------
+        POS_MERR2=5.0                           Max position uncertainty for SCAMP in second SAME_CRVAL run
+        -POS_MERR2=5.0				(arcmin)
+	-------------------------------------------------------------------------------------------------------
+        POS_MERR3=3.0                           Max position uncertainty for SCAMP in third SAME_CRVAL run
+        -POS_MERR3=3.0				(arcmin)
+	-------------------------------------------------------------------------------------------------------
+
+IMPORTANT:
+Sometime SCAMP goes crazy and cannot find astrometry solution, and will expand the image so large that the disk would be
+full if SWarp is executed. In that case, set swarp=false, tweak SCAMP setting until it produces good .head files, then
+set scamp=false and swarp=true to finish stacking.
+
+
+'
+
+#If no argument is given, print doc and exit
+if (( "$#" == 0 )); then
+	echo "$usage"
+	exit 1
+fi
+
+
+# First argument is always the list file
 list_in=$1
-input[0]=$2
-input[1]=$3
-input[2]=$4
+shift
+
+# Take other arguments in and convert all to lower case
+ARGS=`echo "$@" | tr '[:upper:]' '[:lower:]'`
 
 
-#path0=$2
+# Default variables
 
-# Default SCAMP and SWarp are both on
 scamp_TF=true
 swarp_TF=true
 
@@ -21,73 +94,92 @@ SCAMP_CATALOG=ALLWISE
 combine_type=WEIGHTED
 
 
-script_dir=$(cd `dirname $0` && pwd)
-execute_dir=`pwd`
+# See if there are arguments given that overwrites default variables
+for arg in $ARGS; do
+	case $arg in
+		doc|-doc|help|--help|-help|-h)
+			echo "$usage"
+			exit 1
+			;;
+		scamp=true|-scamp=true)
+			scamp_TF=true
+			shift
+			;;
+		scamp=false|-scamp=false)
+			scamp_TF=false
+			shift
+			;;
+		swarp=true|-swarp=true)
+			swarp_TF=true
+			shift
+			;;
+		swarp=false|-swarp=false)
+			swarp_TF=false
+			shift
+			;;
+		scamp_catalog_ahead=*|-scamp_catalog_ahead=*)
+			SCAMP_CATALOG_AHEAD="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
+			shift
+			;;
+                scamp_catalog=*|-scamp_catalog=*)
+                        SCAMP_CATALOG="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
+			shift
+			;;
+		combine_type=*|-combine_type=*)
+			combine_type="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
+			shift
+			;;
+		pos_merr_ahead=*|-pos_merr_ahead=*)
+			POS_MERR_AHEAD="${arg#*=}"
+			shift
+			;;
+		pos_merr1=*|-pos_merr1=*)
+                        POS_MERR="${arg#*=}"
+                        shift
+                        ;;
+                pos_merr2=*|-pos_merr2=*)
+                        POS_MERR2="${arg#*=}"
+                        shift
+                        ;;
+                pos_merr3=*|-pos_merr3=*)
+                        POS_MERR3="${arg#*=}"
+                        shift
+                        ;;
+	esac
+done
 
-
-usage='
-
-Usage:
-
-	In script folder:
-	$ ./individual_stack.sh path_to_files/list_1ne.txt (scamp=true) (swarp=true)
-
-	In script folder running for loop, path_to_file needs to be provided
-	$ for files in `cat path_to_file/listoflist.txt`; do
-	> ./individual_stack.sh $files [path_to_file] (scamp=true) (swarp=true)
-	> done
-
-	In files folder:
-	$ path_to_script/./individual_stack.sh list_1ne.txt (scamp=true) (swarp=true)
-
-This script stack files listed in the input list (ex: list_1ne.txt). the scamp and swarp true/false argument is optional, both default=true,
-and they are case insensitive, orders are interchangeable.
-
-IMPORTANT:
-Sometime SCAMP goes crazy and cannot find astrometry solution, and will expand the image so large that the disk would be
-full if SWarp is executed. In that case, set swarp=false, tweak SCAMP setting until it produces good .head files, then
-set scamp=false and swarp=true to finish stacking.
-
-
-'
-
-# If no argument was given at all, show docs and end the script.
-if [ -z "$list_in" ] && [ -z "$input2" ] && [ -z "$input3" ] && [ -z "$input4" ]
-then
-        echo "$usage"
-        exit 1
+# If there are more than 1 argument left then too much arguments, print doc and exit
+leftover_arg_len="$#"
+if (( $leftover_arg_len > 1 )); then
+	echo "Too many unrecognized arguments!"
+	echo "$usage"
+	exit 1
 fi
 
-
-
-
-condition[0]="scamp=true"
-condition[1]="scamp=false"
-condition[2]="swarp=true"
-condition[3]="swarp=false"
-
-# Check if input $2~$4 has scamp/swarp true/false overwrite
-for ((i=0;i<=2;i++)); do
-	for ((j=0;j<=3;j++)); do
-		if [ "`echo ${input[$i]} | tr '[:upper:]' '[:lower:]'`" == "${condition[$j]}" ]; then
-			software=`echo ${condition[$j]} | awk '{n=split($1,a,"="); print a[1]}'`	# Software = scamp or swarp
-			TorF=`echo ${condition[$j]} | awk '{n=split($1,a,"="); print a[2]}'`		# true or false
-			eval ${software}_TF=$TorF
-		fi
-	done
-done
 
 
 # First set path to empty
 path0=""
 
-# If one of input $2~$4 length > 0 and split with / still > 0, that should be the path, otherwise wrong input
-for ((i=0;i<=2;i++)); do
-	input_len=`echo ${input[$i]} | awk '{n=split($1,a,"/"); print n}'`
-	if (( $input_len > 1 )); then
-		path0=${input[$i]}
+
+# If there is exactly 1 argument left, and splitting it with "/" results in len > 1, it should be the path (when running for loop path need to be given)
+if (( $leftover_arg_len == 1 )); then
+	arg_left="$@"
+	arg_left_len=`echo ${arg_left} | awk '{n=split($1,a,"/"); print n}'`
+	if (( $arg_left_len > 1 )); then
+		path0=$arg_left
+	else
+		echo "Unrecognized argument!"
+		exit 1
 	fi
-done
+fi
+
+
+
+script_dir=$(cd `dirname $0` && pwd)
+execute_dir=`pwd`
+
+
 
 # If argument path is found from above and doesn't end with /, add it; otherwise just use it as path
 # If above doesn't find a path, then path will be empty
@@ -98,8 +190,6 @@ else
 fi
 
 
-# Get the absolute directory path of this script so that it can find extra/files
-script_dir=$(cd `dirname $0` && pwd)
 
 
 # If argument 1 is a full path to the list.txt, ignore 2nd argument and split listname from path
@@ -123,6 +213,22 @@ elif [ ! -e $path$list_in ]; then
         echo -e "File: \t $path$list_in \t can't be found, check the file name or path, Script end."
         exit 1
 fi
+
+
+
+# Print out variables before start
+echo -e "\nList in:" ${list_in}
+echo -e "Files path:" ${path}
+echo -e "SCAMP =" $scamp_TF
+echo -e "SWarp =" $swarp_TF
+echo -e "SCAMP_CATALOG_AHEAD =" $SCAMP_CATALOG_AHEAD
+echo -e "SCAMP_CATALOG =" $SCAMP_CATALOG
+echo -e "combine_type =" $combine_type
+echo -e "POS_MERR_AHEAD =" $POS_MERR_AHEAD
+echo -e "POS_MERR =" $POS_MERR
+echo -e "POS_MERR2 =" $POS_MERR2
+echo -e "POS_MERR3 =" $POS_MERR3
+echo -e "\n"
 
 
 
