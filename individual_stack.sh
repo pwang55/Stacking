@@ -1,12 +1,16 @@
 #!/bin/bash
 
 list_in=$1
-path0=$2
+input[0]=$2
+input[1]=$3
+input[2]=$4
 
-# TRUE for running SCAMP, FALSE for skipping SCAMP
-SCAMP_REDO=TRUE
-# TRUE for running stacking, FALSE for just running sextractor and scamp but don't stack yet (useful if scamp is problematic)
-DO_STACKING=TRUE
+
+#path0=$2
+
+# Default SCAMP and SWarp are both on
+scamp_TF=true
+swarp_TF=true
 
 POS_MERR_AHEAD=5.0
 POS_MERR=10.0
@@ -26,43 +30,78 @@ usage='
 Usage:
 
 	In script folder:
-	$ ./individual_stack.sh path_to_files/list_1ne.txt
+	$ ./individual_stack.sh path_to_files/list_1ne.txt (scamp=true) (swarp=true)
 
 	In script folder running for loop, path_to_file needs to be provided
 	$ for files in `cat path_to_file/listoflist.txt`; do
-	> ./individual_stack.sh $files [path_to_file]
+	> ./individual_stack.sh $files [path_to_file] (scamp=true) (swarp=true)
 	> done
 
 	In files folder:
-	$ path_to_script/./individual_stack.sh list_1ne.txt
+	$ path_to_script/./individual_stack.sh list_1ne.txt (scamp=true) (swarp=true)
 
-This script stack files listed in the input list (ex: list_1ne.txt).
+This script stack files listed in the input list (ex: list_1ne.txt). the scamp and swarp true/false argument is optional, both default=true,
+and they are case insensitive, orders are interchangeable.
 
 IMPORTANT:
 Sometime SCAMP goes crazy and cannot find astrometry solution, and will expand the image so large that the disk would be
-full if SWarp is executed. In that case, disable SWarp, tweak SCAMP setting until it produces good .head files, then
-set SCAMP_REDO=FALSE and DO_STACKING=TRUE to finish stacking.
+full if SWarp is executed. In that case, set swarp=false, tweak SCAMP setting until it produces good .head files, then
+set scamp=false and swarp=true to finish stacking.
 
 
 '
 
 # If no argument was given at all, show docs and end the script.
-if [ -z "$list_in" ] && [ -z "$path0" ]
+if [ -z "$list_in" ] && [ -z "$input2" ] && [ -z "$input3" ] && [ -z "$input4" ]
 then
         echo "$usage"
         exit 1
 fi
 
-# Get the absolute directory path of this script so that it can find extra/files
-script_dir=$(cd `dirname $0` && pwd)
 
-# If argument 2 is provided and doesn't end with /, add it; otherwise just use it as path
-# If argument 2 is not given, path would just be empty
+
+
+condition[0]="scamp=true"
+condition[1]="scamp=false"
+condition[2]="swarp=true"
+condition[3]="swarp=false"
+
+# Check if input $2~$4 has scamp/swarp true/false overwrite
+for ((i=0;i<=2;i++)); do
+	for ((j=0;j<=3;j++)); do
+		if [ "`echo ${input[$i]} | tr '[:upper:]' '[:lower:]'`" == "${condition[$j]}" ]; then
+			software=`echo ${condition[$j]} | awk '{n=split($1,a,"="); print a[1]}'`	# Software = scamp or swarp
+			TorF=`echo ${condition[$j]} | awk '{n=split($1,a,"="); print a[2]}'`		# true or false
+			eval ${software}_TF=$TorF
+		fi
+	done
+done
+
+
+# First set path to empty
+path0=""
+
+# If one of input $2~$4 length > 0 and split with / still > 0, that should be the path, otherwise wrong input
+for ((i=0;i<=2;i++)); do
+	input_len=`echo ${input[$i]} | awk '{n=split($1,a,"/"); print n}'`
+	if (( $input_len > 1 )); then
+		path0=${input[$i]}
+	fi
+done
+
+# If argument path is found from above and doesn't end with /, add it; otherwise just use it as path
+# If above doesn't find a path, then path will be empty
 if [ -n "$path0" ] && [ "${path0: -1}" != "/" ]; then
         path=$path0/
 else
         path=$path0
 fi
+
+
+# Get the absolute directory path of this script so that it can find extra/files
+script_dir=$(cd `dirname $0` && pwd)
+
+
 # If argument 1 is a full path to the list.txt, ignore 2nd argument and split listname from path
 len_file=`echo $list_in | awk '{n=split($1,a,"/"); print n}'`
 if (( $len_file > 1 )); then
@@ -139,7 +178,7 @@ done
 
 
 
-if [ $SCAMP_REDO == "TRUE" ]; then
+if [ $scamp_TF == "true" ]; then
 	for file1 in `cat ${path}cats_for_scamp/${cluster_name}_${filter_location}_cats_for_scamp_list.txt`; do
 		name=`echo $file1 | sed -e 's/\.cat//g'`
 		name2=`echo $name | sed -e 's/_for_scamp//g'`
@@ -152,8 +191,8 @@ if [ $SCAMP_REDO == "TRUE" ]; then
 #		scamp -MOSAIC_TYPE SAME_CRVAL -ASTREF_CATALOG $SCAMP_CATALOG -POSITION_MAXERR $POS_MERR3 -c ${script_dir}/extra/default.scamp ${path}$file
 		mv ${path}${name}.head ${path}${name2}.head
 	done
-elif [ $SCAMP_REDO == "FALSE" ]; then
-	echo -e "SCAMP_REDO = FALSE, skip running SCAMP.\n"
+elif [ $scamp_TF == "false" ]; then
+	echo -e "SCAMP = FALSE, skip running SCAMP.\n"
 	fname=`head -1 ${path}cats_for_scamp/${cluster_name}_${filter_location}_cats_for_scamp_list.txt`
 	name=`echo $fname | sed -e 's/\.cat//g'`
 	name2=`echo $name | sed -e 's/_for_scamp//g'`
@@ -175,10 +214,10 @@ if [ -n $path ]; then
 fi
 
 
-if [ $DO_STACKING == "TRUE" ]; then
+if [ $swarp_TF == "true" ]; then
 	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -COMBINE_TYPE $combine_type
-elif [ $DO_STACKING == "FALSE" ]; then
-	echo "DO_STACKING = FALSE, skip running SWarp."
+elif [ $swarp_TF == "false" ]; then
+	echo "SWarp = FALSE, skip running SWarp."
 #	echo "DO_STACKING = FALSE, skip running SWarp. Variables saved to file"
 #	:>${path}stacking_variables.txt
 #	echo "path="${path} >> ${path}stacking_variables.txt
