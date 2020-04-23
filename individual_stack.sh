@@ -6,56 +6,42 @@ usage='
 Usage:
 
         In script folder:
-	$ ./individual_stack.sh path_to_files/list_1ne.txt (option1) (option2) ...
+	$ ./individual_stack.sh path_to_files/list_1ne.txt (-option1) (-option2) ...
 
         In script folder running for loop, path_to_file needs to be provided
         $ for files in `cat path_to_file/listoflist.txt`; do
-	> ./individual_stack.sh $files [path_to_file] (option1) (option2) ...
+	> ./individual_stack.sh $files [path_to_file] (-option1) (-option2) ...
         > done
 
         In files folder:
-        $ path_to_script/./individual_stack.sh list_1ne.txt (option1) (option2) ...
+        $ path_to_script/./individual_stack.sh list_1ne.txt (-option1) (-option2) ...
 
 This script stack files listed in the input list (ex: list_1ne.txt). 
 The list file (ex: list_1ne.txt) has to be the first argument. All others are interchangeable.
 
 Optional arguments are (case insensitive):
 
-	-------------------------------------------------------------------------------------------------------
-	doc					Print doc and exit.
-	-doc
-	help
-	-help
-	--help
-	-h
-	-------------------------------------------------------------------------------------------------------
-	scamp=true 				Run SCAMP, default=true
-	-scamp=true
-	-------------------------------------------------------------------------------------------------------
-	scamp=false				Skip SCAMP
-	-scamp=false
-	-------------------------------------------------------------------------------------------------------
-	SCAMP_CATALOG_AHEAD=ALLWISE		Catalog for first time running SCAMP with LOOSE mosaic type.
-	-SCAMP_CATALOG_AHEAD=ALLWISE		Should be from SCAMP options. Default here is ALLWISE
-	-------------------------------------------------------------------------------------------------------
-	SCAMP_CATALOG=ALLWISE			Catalog for running SCAMP after LOOSE, now with SAME_CRVAL.
-	-SCAMP_CATALOG=ALLWISE			Default is ALLWISE
-	-------------------------------------------------------------------------------------------------------
-	combine_type=WEIGHTED			Stacking combine type. Default is weighted stack.
-	-combine_type=WEIGHTED
-	-------------------------------------------------------------------------------------------------------
-	POS_MERR_AHEAD=5.0			Max position uncertainty for SCAMP in LOOSE mosaic type run
-	-POS_MERR_AHEAD=5.0			(arcmin)
-	-------------------------------------------------------------------------------------------------------
-	POS_MERR1=10.0				Max position uncertainty for SCAMP in first SAME_CRVAL run
-	-POS_MERR1=10.0				(arcmin)
-	-------------------------------------------------------------------------------------------------------
-        POS_MERR2=5.0                           Max position uncertainty for SCAMP in second SAME_CRVAL run
-        -POS_MERR2=5.0				(arcmin)
-	-------------------------------------------------------------------------------------------------------
-        POS_MERR3=3.0                           Max position uncertainty for SCAMP in third SAME_CRVAL run
-        -POS_MERR3=3.0				(arcmin)
-	-------------------------------------------------------------------------------------------------------
+
+	-doc | -h | -help		Print doc and exit.
+
+	-scamp=true			Run SCAMP, default=true
+
+	-scamp=false			Skip SCAMP
+
+	-SCAMP_CATALOG_AHEAD=ALLWISE	Catalog for first SCAMP LOOSE type run, default is ALLWISE
+
+	-SCAMP_CATALOG=ALLWISE		Catalog for first SCAMP SAME_CRVAL run, default is ALLWISE
+
+	-combine_type=WEIGHTED		Stacking combine type. Default is weighted stack.
+
+	-POS_MERR_AHEAD=5.0		Max position uncertainty for SCAMP LOOSE (arcmin)
+
+	-POS_MERR1=10.0			Max position uncertainty for SCAMP 1st SAME_CRVAL (arcmin)
+
+        -POS_MERR2=5.0			Max position uncertainty for SCAMP 2nd SAME_CRVAL (arcmin)
+
+        -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
+
 
 IMPORTANT:
 Sometime SCAMP goes crazy and cannot find astrometry solution, and will expand the image so large that the disk would be
@@ -97,51 +83,51 @@ combine_type=WEIGHTED
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
 	case $arg in
-		doc|-doc|help|--help|-help|-h)
+		-doc|-help|-h)
 			echo "$usage"
 			exit 1
 			;;
-		scamp=true|-scamp=true)
+		-scamp=true)
 			scamp_TF=true
 			shift
 			;;
-		scamp=false|-scamp=false)
+		-scamp=false)
 			scamp_TF=false
 			shift
 			;;
-		swarp=true|-swarp=true)
+		-swarp=true)
 			swarp_TF=true
 			shift
 			;;
-		swarp=false|-swarp=false)
+		-swarp=false)
 			swarp_TF=false
 			shift
 			;;
-		scamp_catalog_ahead=*|-scamp_catalog_ahead=*)
+		-scamp_catalog_ahead=*)
 			SCAMP_CATALOG_AHEAD="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
 			shift
 			;;
-                scamp_catalog=*|-scamp_catalog=*)
+                -scamp_catalog=*)
                         SCAMP_CATALOG="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
 			shift
 			;;
-		combine_type=*|-combine_type=*)
+		-combine_type=*)
 			combine_type="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
 			shift
 			;;
-		pos_merr_ahead=*|-pos_merr_ahead=*)
+		-pos_merr_ahead=*)
 			POS_MERR_AHEAD="${arg#*=}"
 			shift
 			;;
-		pos_merr1=*|-pos_merr1=*)
+		-pos_merr1=*)
                         POS_MERR="${arg#*=}"
                         shift
                         ;;
-                pos_merr2=*|-pos_merr2=*)
+                -pos_merr2=*)
                         POS_MERR2="${arg#*=}"
                         shift
                         ;;
-                pos_merr3=*|-pos_merr3=*)
+                -pos_merr3=*)
                         POS_MERR3="${arg#*=}"
                         shift
                         ;;
@@ -151,7 +137,7 @@ done
 # If there are more than 1 argument left then too much arguments, print doc and exit
 leftover_arg_len="$#"
 if (( $leftover_arg_len > 1 )); then
-	echo "Too many unrecognized arguments!"
+	echo "Too many unrecognized arguments:" "$@" 
 	echo "$usage"
 	exit 1
 fi
