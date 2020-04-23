@@ -39,6 +39,8 @@ Optional arguments are (case insensitive):
 
 	-swarp=quiet			No SWarp output on screen (default: NORMAL)
 
+	-subtractbackground=Y           SWarp will subtract background (N will not). Default Y
+
 	-POS_MERR2=5.0                  Max position uncertainty for SCAMP 2nd SAME_CRVAL (arcmin) (deactivated now)
 
 	-POS_MERR3=3.0                  Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin) (deactivated now)
@@ -80,6 +82,7 @@ combine_type=WEIGHTED
 SEX_VERBOSE=NORMAL
 SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
+SUBTRACT_BACKGROUND=Y
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
@@ -136,6 +139,10 @@ for arg in $ARGS; do
 			SWARP_VERBOSE=QUIET
 			shift
 			;;
+                -subtractbackground=n)
+                        SUBTRACT_BACKGROUND=N
+                        shift
+                        ;;
         esac
 done
 
@@ -188,6 +195,7 @@ echo -e "SWARP_VERBOSE =" $SWARP_VERBOSE
 echo -e "POS_MERR =" $POS_MERR
 echo -e "POS_MERR2 =" $POS_MERR2
 echo -e "POS_MERR3 =" $POS_MERR3
+echo -e "SUBTRACT_BACKGROUND =" $SUBTRACT_BACKGROUND
 echo -e "\n"
 
 
@@ -263,7 +271,7 @@ fi
 
 
 if [ $swarp_TF == "true" ]; then
-	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}master_${base2}.fits -WEIGHTOUT_NAME ${path}master_${base2}.wt.fits -COMBINE_TYPE $combine_type -VERBOSE_TYPE $SWARP_VERBOSE
+	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}master_${base2}.fits -WEIGHTOUT_NAME ${path}master_${base2}.wt.fits -SUBTRACT_BACK $SUBTRACT_BACKGROUND -COMBINE_TYPE $combine_type -VERBOSE_TYPE $SWARP_VERBOSE
 elif [ $swarp_TF == "false" ]; then
         echo "SWarp = FALSE, skip running SWarp."
 fi

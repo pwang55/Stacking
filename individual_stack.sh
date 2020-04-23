@@ -52,6 +52,8 @@ Optional arguments are (case insensitive):
 
         -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
+	-subtractbackground=Y		SWarp will subtract background (N will not). Default Y
+
 
 IMPORTANT:
 Sometime SCAMP goes crazy and cannot find astrometry solution, and will expand the image so large that the disk would be
@@ -91,6 +93,7 @@ combine_type=WEIGHTED
 SEX_VERBOSE=NORMAL
 SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
+SUBTRACT_BACKGROUND=Y
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
@@ -155,6 +158,10 @@ for arg in $ARGS; do
                         SWARP_VERBOSE=QUIET
                         shift
                         ;;
+		-subtractbackground=n)
+			SUBTRACT_BACKGROUND=N
+			shift
+			;;
 	esac
 done
 
@@ -241,6 +248,7 @@ echo -e "POS_MERR_AHEAD =" $POS_MERR_AHEAD
 echo -e "POS_MERR =" $POS_MERR
 echo -e "POS_MERR2 =" $POS_MERR2
 echo -e "POS_MERR3 =" $POS_MERR3
+echo -e "SUBTRACT_BACKGROUND =" $SUBTRACT_BACKGROUND
 echo -e "\n"
 
 
@@ -334,7 +342,7 @@ fi
 
 
 if [ $swarp_TF == "true" ]; then
-	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type
+	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -SUBTRACT_BACK $SUBTRACT_BACKGROUND -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type
 elif [ $swarp_TF == "false" ]; then
 	echo "SWarp = FALSE, skip running SWarp."
 fi
