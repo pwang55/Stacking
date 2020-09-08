@@ -97,9 +97,9 @@ Options (case insensitive):
 ```
         -doc | -h | -help               Print doc and exit.
 
-        -scamp=true                     Run SCAMP, default
+        -scamp=true                     Run SCAMP
 
-        -scamp=false                    Skip SCAMP
+        -scamp=false                    Skip SCAMP (Will also skip sextractor), default
 
 	-swarp=true			Run SWarp, default
 
