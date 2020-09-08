@@ -19,9 +19,9 @@ Optional arguments are (case insensitive):
 
         -doc | -h | -help               Print doc and exit.
 
-        -scamp=true                     Run SCAMP, default
+        -scamp=true                     Run SCAMP
 
-        -scamp=false                    Skip SCAMP
+        -scamp=false                    Skip SCAMP (Will also skip sextractor), default
 
 	-swarp=true			Run SWarp, default
 
@@ -72,7 +72,7 @@ ARGS=`echo "$@" | tr '[:upper:]' '[:lower:]'`
 
 
 # Default variables
-scamp_TF=true
+scamp_TF=false
 swarp_TF=true
 POS_MERR=2.0
 POS_MERR2=5.0
@@ -203,16 +203,6 @@ echo -e "\n"
 ###############################
 
 
-# Create folder for sextractor created cats for scamp
-if [ ! -d ${path}cats_for_scamp ]; then
-	mkdir ${path}cats_for_scamp
-fi
-# Create a directory for scamp logs
-if [ ! -d ${path}scamp_logs ]; then
-        mkdir ${path}scamp_logs
-fi
-
-
 # Get some useful names
 firstfilename=`head -1 ${path}$list_in`
 firstfilebase=`echo $firstfilename | sed -e 's/\.fits//g'`
@@ -220,27 +210,33 @@ cluster_name=`echo $firstfilebase | awk '{split($1,a,"_"); print a[2]}'`	# Get c
 word_stack=`echo $firstfilebase | awk '{split($1,a,"_"); print a[1]}'`		# literally just the word "stack"
 base2=`echo ${word_stack}_${cluster_name}`					# stack_(cluster) for later creating final file names
 
-# Clear or create a file containing all cats_for_scamp.cat
-:>${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
-
-
-for file1 in `cat ${path}$list_in`; do
-        base=`echo $file1 | sed -e 's/\.fits//g'`
-	if [ -e ${path}cats_for_scamp/${base}_for_scamp.cat ]; then
-        	echo -e "\nFile:" $file1 ": SExtractor cat file already exist!! \n"
-		ls ${path}cats_for_scamp/${base}_for_scamp.cat | xargs -n 1 basename >> ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
-	else
-		sex ${path}$file1 -c ${script_dir}/extra/get_cat_for_scamp.config -PARAMETERS_NAME ${script_dir}/extra/before_scamp.param -WEIGHT_IMAGE ${path}${base}.wt.fits -FILTER_NAME ${script_dir}/extra/gauss_2.5_5x5.conv -VERBOSE_TYPE $SEX_VERBOSE -CATALOG_NAME ${path}cats_for_scamp/${base}_temp.cat
-        	conv_filter=$(python ${script_dir}/extra/fwhm.py ${path}cats_for_scamp/${base}_temp.cat 2>&1)
-		echo '--------- Using ' $conv_filter ' ---------'
-        	rm ${path}cats_for_scamp/${base}_temp.cat
-		sex ${path}$file1 -c ${script_dir}/extra/get_cat_for_scamp.config -PARAMETERS_NAME ${script_dir}/extra/before_scamp.param -WEIGHT_IMAGE ${path}${base}.wt.fits -FILTER_NAME ${script_dir}/extra/$conv_filter -CATALOG_TYPE FITS_LDAC -VERBOSE_TYPE $SEX_VERBOSE -CATALOG_NAME ${path}cats_for_scamp/${base}_for_scamp.cat
-		ls ${path}cats_for_scamp/${base}_for_scamp.cat | xargs -n 1 basename >> ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
-	fi
-done
-
 
 if [ $scamp_TF == "true" ]; then
+        # Create folder for sextractor created cats for scamp
+        if [ ! -d ${path}cats_for_scamp ]; then
+                mkdir ${path}cats_for_scamp
+        fi
+        # Create a directory for scamp logs
+        if [ ! -d ${path}scamp_logs ]; then
+                mkdir ${path}scamp_logs
+        fi
+        # Clear or create a file containing all cats_for_scamp.cat
+        :>${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
+        for file1 in `cat ${path}$list_in`; do
+                base=`echo $file1 | sed -e 's/\.fits//g'`
+                if [ -e ${path}cats_for_scamp/${base}_for_scamp.cat ]; then
+                        echo -e "\nFile:" $file1 ": SExtractor cat file already exist!! \n"
+                        ls ${path}cats_for_scamp/${base}_for_scamp.cat | xargs -n 1 basename >> ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
+                else
+                        sex ${path}$file1 -c ${script_dir}/extra/get_cat_for_scamp.config -PARAMETERS_NAME ${script_dir}/extra/before_scamp.param -WEIGHT_IMAGE ${path}${base}.wt.fits -FILTER_NAME ${script_dir}/extra/gauss_2.5_5x5.conv -VERBOSE_TYPE $SEX_VERBOSE -CATALOG_NAME ${path}cats_for_scamp/${base}_temp.cat
+                        conv_filter=$(python ${script_dir}/extra/fwhm.py ${path}cats_for_scamp/${base}_temp.cat 2>&1)
+                        echo '--------- Using ' $conv_filter ' ---------'
+                        rm ${path}cats_for_scamp/${base}_temp.cat
+                        sex ${path}$file1 -c ${script_dir}/extra/get_cat_for_scamp.config -PARAMETERS_NAME ${script_dir}/extra/before_scamp.param -WEIGHT_IMAGE ${path}${base}.wt.fits -FILTER_NAME ${script_dir}/extra/$conv_filter -CATALOG_TYPE FITS_LDAC -VERBOSE_TYPE $SEX_VERBOSE -CATALOG_NAME ${path}cats_for_scamp/${base}_for_scamp.cat
+                        ls ${path}cats_for_scamp/${base}_for_scamp.cat | xargs -n 1 basename >> ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt
+                fi
+        done
+
 	for file1 in `cat ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt`; do
 		name=`echo $file1 | sed -e 's/\.cat//g'`
 		name2=`echo $name | sed -e 's/_for_scamp//g'`
@@ -252,7 +248,7 @@ if [ $scamp_TF == "true" ]; then
 		mv ${path}${name}.head ${path}${name2}.head
 	done
 elif [ $scamp_TF == "false" ]; then
-	echo -e "SCAMP = FALSE, skip running SCAMP.\n"
+	echo -e "SCAMP = FALSE, skip running SExtractor and SCAMP.\n"
 #	fname=`head -1 ${path}cats_for_scamp/${cluster_name}_cats_for_scamp_list.txt`
 #        name=`echo $fname | sed -e 's/\.cat//g'`
 #        name2=`echo $name | sed -e 's/_for_scamp//g'`
