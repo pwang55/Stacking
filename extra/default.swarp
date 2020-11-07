@@ -12,7 +12,7 @@ HEADER_SUFFIX          .head           # Filename extension for additional heade
  
 WEIGHT_TYPE            MAP_WEIGHT            # BACKGROUND,MAP_RMS,MAP_VARIANCE
                                        # or MAP_WEIGHT
-RESCALE_WEIGHTS        Y               # Rescale input weights/variances (Y/N)?
+RESCALE_WEIGHTS        N               # Rescale input weights/variances (Y/N)?
 WEIGHT_SUFFIX          .wt.fits    # Suffix to use for weight-maps
 WEIGHT_IMAGE                           # Weightmap filename if suffix not used
                                        # (all or for each weight-map)
