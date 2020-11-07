@@ -19,30 +19,26 @@ Usage:
 This script stack files listed in the input list (ex: list_1ne.txt). 
 The list file (ex: list_1ne.txt) has to be the first argument. All others are interchangeable.
 
-Optional arguments are (case insensitive):
+Optional arguments and their default values are (case insensitive):
 
 
 	-doc | -h | -help		Print doc and exit.
 
-	-scamp=true			Run SCAMP, default
+	-scamp=true			Run SCAMP (false will skip SExtractor and SCAMP)
 
-	-scamp=false			Skip SCAMP
+	-swarp=true			Run SWarp (false will skip SWarp)
 
-	-swarp=true			Run SWarp, default
+	-SCAMP_CATALOG_AHEAD=ALLWISE	Catalog for first SCAMP LOOSE type run
 
-	-swarp=false			Skip SWarp
+	-SCAMP_CATALOG=ALLWISE		Catalog for first SCAMP SAME_CRVAL run
 
-	-SCAMP_CATALOG_AHEAD=ALLWISE	Catalog for first SCAMP LOOSE type run, default is ALLWISE
+	-combine_type=WEIGHTED		Stacking combine type
 
-	-SCAMP_CATALOG=ALLWISE		Catalog for first SCAMP SAME_CRVAL run, default is ALLWISE
+        -sextractor=quiet               No Source Extractor output on screen, can be normal or quiet
 
-	-combine_type=WEIGHTED		Stacking combine type. Default is weighted stack.
+        -scamp=normal                   SCAMP output type, can be NORMAL or LOG
 
-        -sextractor=quiet               No Source Extractor output on screen (default=NORMAL)
-
-        -scamp=log                      SCAMP output in the form of LOG (default: NORMAL)
-
-        -swarp=quiet                    No SWarp output on screen (default: NORMAL)
+        -swarp=normal                   SWarp output on screen, can be normal or quiet
 
 	-POS_MERR_AHEAD=5.0		Max position uncertainty for SCAMP LOOSE (arcmin)
 
@@ -52,7 +48,7 @@ Optional arguments are (case insensitive):
 
         -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
-	-subtractbackground=Y		SWarp will subtract background (N will not). Default Y
+	-subtractbackground=N		SWarp will not subtract background (Y will)
 
 
 IMPORTANT:
@@ -93,7 +89,7 @@ combine_type=WEIGHTED
 SEX_VERBOSE=NORMAL
 SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
-SUBTRACT_BACKGROUND=Y
+SUBTRACT_BACKGROUND=N
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
