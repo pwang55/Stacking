@@ -74,6 +74,7 @@ shift
 ARGS=`echo "$@" | tr '[:upper:]' '[:lower:]'`
 
 
+
 # Default variables
 
 scamp_TF=true
