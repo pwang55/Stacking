@@ -48,7 +48,7 @@ Optional arguments and their default values are (case insensitive):
 
         -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
-	-subtractbackground=N		SWarp will not subtract background (Y will)
+	-subtractbackground=Y		SWarp will not subtract background (N will not)
 
 
 IMPORTANT:
@@ -90,7 +90,7 @@ combine_type=WEIGHTED
 SEX_VERBOSE=QUIET
 SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
-SUBTRACT_BACKGROUND=N
+SUBTRACT_BACKGROUND=Y
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
@@ -159,6 +159,10 @@ for arg in $ARGS; do
 			SUBTRACT_BACKGROUND=N
 			shift
 			;;
+	        -subtractbackground=y)
+            	        SUBTRACT_BACKGROUND=Y
+                        shift
+                        ;;
 	esac
 done
 

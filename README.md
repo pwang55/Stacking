@@ -71,7 +71,7 @@ Options(case insensitive):
 
         -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
-	-subtractbackground=N		SWarp will not subtract background (Y will)
+	-subtractbackground=Y		SWarp will not subtract background (N will not)
 ```
 
 ---------------------------------------------------------------
