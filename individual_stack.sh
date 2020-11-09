@@ -34,21 +34,23 @@ Optional arguments and their default values are (case insensitive):
 
 	-combine_type=WEIGHTED		Stacking combine type
 
-        -sextractor=quiet               No Source Extractor output on screen, can be normal or quiet
+	-sextractor=quiet		No Source Extractor output on screen, can be normal or quiet
 
-        -scamp=normal                   SCAMP output type, can be NORMAL or LOG
+	-scamp=normal			SCAMP output type, can be NORMAL or LOG
 
-        -swarp=normal                   SWarp output on screen, can be normal or quiet
+	-swarp=normal			SWarp output on screen, can be normal or quiet
 
 	-POS_MERR_AHEAD=5.0		Max position uncertainty for SCAMP LOOSE (arcmin)
 
 	-POS_MERR1=10.0			Max position uncertainty for SCAMP 1st SAME_CRVAL (arcmin)
 
-        -POS_MERR2=5.0			Max position uncertainty for SCAMP 2nd SAME_CRVAL (arcmin)
+	-POS_MERR2=5.0			Max position uncertainty for SCAMP 2nd SAME_CRVAL (arcmin)
 
-        -POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
+	-POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
 	-subtractbackground=Y		SWarp will not subtract background (N will not)
+
+	-SWARP_BACKSIZE=128		SWarp background estimation mesh size
 
 
 IMPORTANT:
@@ -91,6 +93,7 @@ SEX_VERBOSE=QUIET
 SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
 SUBTRACT_BACKGROUND=Y
+SWARP_BACKSIZE=128
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
@@ -119,8 +122,8 @@ for arg in $ARGS; do
 			SCAMP_CATALOG_AHEAD="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
 			shift
 			;;
-                -scamp_catalog=*)
-                        SCAMP_CATALOG="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
+		-scamp_catalog=*)
+			SCAMP_CATALOG="`echo ${arg#*=} | tr '[:lower:]' '[:upper:]'`"
 			shift
 			;;
 		-combine_type=*)
@@ -132,37 +135,41 @@ for arg in $ARGS; do
 			shift
 			;;
 		-pos_merr1=*)
-                        POS_MERR="${arg#*=}"
-                        shift
-                        ;;
-                -pos_merr2=*)
-                        POS_MERR2="${arg#*=}"
-                        shift
-                        ;;
-                -pos_merr3=*)
-                        POS_MERR3="${arg#*=}"
-                        shift
-                        ;;
-                -sextractor=quiet)
-                        SEX_VERBOSE=QUIET
-                        shift
-                        ;;
-                -scamp=log)
-                        SCAMP_VERBOSE=LOG
-                        shift
-                        ;;
-                -swarp=quiet)
-                        SWARP_VERBOSE=QUIET
-                        shift
-                        ;;
+			POS_MERR="${arg#*=}"
+			shift
+			;;
+		-pos_merr2=*)
+			POS_MERR2="${arg#*=}"
+			shift
+			;;
+		-pos_merr3=*)
+			POS_MERR3="${arg#*=}"
+			shift
+			;;
+		-sextractor=quiet)
+			SEX_VERBOSE=QUIET
+			shift
+			;;
+		-scamp=log)
+			SCAMP_VERBOSE=LOG
+			shift
+			;;
+		-swarp=quiet)
+			SWARP_VERBOSE=QUIET
+			shift
+			;;
 		-subtractbackground=n)
 			SUBTRACT_BACKGROUND=N
 			shift
 			;;
-	        -subtractbackground=y)
-            	        SUBTRACT_BACKGROUND=Y
-                        shift
-                        ;;
+		-subtractbackground=y)
+			SUBTRACT_BACKGROUND=Y
+			shift
+			;;
+		-swarp_backsize=*)
+			SWARP_BACKSIZE="${arg#*=}"
+			shift
+			;;
 	esac
 done
 
@@ -250,6 +257,7 @@ echo -e "POS_MERR =" $POS_MERR
 echo -e "POS_MERR2 =" $POS_MERR2
 echo -e "POS_MERR3 =" $POS_MERR3
 echo -e "SUBTRACT_BACKGROUND =" $SUBTRACT_BACKGROUND
+echo -e "SWARP_BACKSIZE =" $SWARP_BACKSIZE
 echo -e "\n"
 
 
