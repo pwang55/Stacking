@@ -356,6 +356,7 @@ elif [ $swarp_TF == "false" ]; then
 	echo "SWarp = FALSE, skip running SWarp."
 fi
 
-
-
+if [ -n $path ]; then
+        rm ${path}${list_in}
+fi
 
