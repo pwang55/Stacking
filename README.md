@@ -8,6 +8,10 @@ Output format will be stack_(clustername)_1ne.fits and it's weight image.
 **`master_stack.sh`** takes masterlist.txt containing all stacked image, create a master stacked image.
 The master stacked image is crucial for photometry analysis.
 
+**`convert_jan_name.py`** converts January file names into standard corrected_xxxx.fits.
+
+**`jan_individual_stack.sh`** works like individual_stack.sh but works on January files
+
 ---------------------------------------------------------------
 
 Each Usage:
@@ -86,7 +90,7 @@ In files folder:
 
 `$ path_to_script/./master_stack.sh masterlist.txt (-option1) (-option2) ...`
 
-You need to reate masterlist.txt yourself.
+You need to create masterlist.txt yourself.
 
 Options (case insensitive):
 
@@ -121,5 +125,37 @@ Options (case insensitive):
 ```
 
 
+---------------------------------------------------------------
+
+**convert_jan_name.py**
+
+In script folder:
+
+`$ python convert_jan_name.py path_to_files clustername`
+
+In files folder:
+
+`$ python path_to_script/convert_jan_name.py clustername`
+
+
+---------------------------------------------------------------
+
+**jan_individual_stack.sh**
+
+In script folder:
+
+`$ ./individual_stack.sh path_to_files/list_1ne.txt (-option1) (-option2) ...`
+
+In script folder running for loop, path_to_file needs to be provided
+
+```
+$ for files in `cat path_to_file/listoflist.txt`; do
+> ./individual_stack.sh $files [path_to_file] (-option1) (-option2) ...
+> done
+```
+
+In files folder:
+
+`$ path_to_script/./individual_stack.sh list_1ne.txt (-option1) (-option2) ...`
 
 
