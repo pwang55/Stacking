@@ -22,9 +22,8 @@ execute_dir=`pwd`
 script_dir=$(cd `dirname $0` && pwd)
 
 
-if [ -z "$input2" ]
-then
-	if [[ $input1 != *"/"* ]] && [ $execute_dir != $script_dir ]; then
+if [ -z "$input2" ]; then
+	if [[ $input1 != *"/"* ]] && [[ $execute_dir != $script_dir ]]; then
 		cluster_name=$1
 		filepath=""
 	else
@@ -43,8 +42,7 @@ fi
 
 
 # If no argument was given at all, show docs and end the script.
-if [ -z "$cluster_name" ]
-then
+if [ -z "$cluster_name" ]; then
         echo "$usage"
         exit 1
 fi
