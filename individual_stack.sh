@@ -359,7 +359,7 @@ fi
 
 
 if [ $swarp_TF == "true" ]; then
-	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -SUBTRACT_BACK $SUBTRACT_BACKGROUND -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type -BACK_SIZE $BACK_SIZE -BACK_FILTERSIZE $BACK_FILTERSIZE
+	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -SUBTRACT_BACK $SUBTRACT_BACKGROUND -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type -BACK_SIZE $SWARP_BACKSIZE -BACK_FILTERSIZE $SWARP_BACKFILTERSIZE
 elif [ $swarp_TF == "false" ]; then
 	echo "SWarp = FALSE, skip running SWarp."
 fi
