@@ -48,9 +48,11 @@ Optional arguments and their default values are (case insensitive):
 
 	-POS_MERR3=3.0			Max position uncertainty for SCAMP 3rd SAME_CRVAL (arcmin)
 
-	-subtractbackground=Y		SWarp will not subtract background (N will not)
+	-subtractbackground=Y		SWarp will subtract background (N will not)
 
-	-SWARP_BACKSIZE=128		SWarp background estimation mesh size
+	-SWARP_BACKSIZE=128		SWarp BACK_SIZE
+
+	-SWARP_BACKFILTERSIZE=3		SWarp BACK_FILTERSIZE
 
 
 IMPORTANT:
@@ -94,6 +96,7 @@ SCAMP_VERBOSE=NORMAL
 SWARP_VERBOSE=NORMAL
 SUBTRACT_BACKGROUND=Y
 SWARP_BACKSIZE=128
+SWARP_BACKFILTERSIZE=3
 
 # See if there are arguments given that overwrites default variables
 for arg in $ARGS; do
@@ -170,6 +173,10 @@ for arg in $ARGS; do
 			SWARP_BACKSIZE="${arg#*=}"
 			shift
 			;;
+		-swarp_backfiltersize=*)
+			SWARP_BACKFILTERSIZE="${arg#*=}"
+			shift
+			;;            
 	esac
 done
 
@@ -258,6 +265,7 @@ echo -e "POS_MERR2 =" $POS_MERR2
 echo -e "POS_MERR3 =" $POS_MERR3
 echo -e "SUBTRACT_BACKGROUND =" $SUBTRACT_BACKGROUND
 echo -e "SWARP_BACKSIZE =" $SWARP_BACKSIZE
+echo -e "SWARP_BACKFILTERSIZE =" $SWARP_BACKFILTERSIZE
 echo -e "\n"
 
 
@@ -351,7 +359,7 @@ fi
 
 
 if [ $swarp_TF == "true" ]; then
-	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -SUBTRACT_BACK $SUBTRACT_BACKGROUND -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type
+	swarp @${path}$list_in -c ${script_dir}/extra/default.swarp -IMAGEOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.fits -WEIGHTOUT_NAME ${path}stacked_results/stack_${cluster_name}_${filter_location}.wt.fits -GAIN_DEFAULT $ave_gain -SUBTRACT_BACK $SUBTRACT_BACKGROUND -VERBOSE_TYPE $SWARP_VERBOSE -COMBINE_TYPE $combine_type -BACK_SIZE $BACK_SIZE -BACK_FILTERSIZE $BACK_FILTERSIZE
 elif [ $swarp_TF == "false" ]; then
 	echo "SWarp = FALSE, skip running SWarp."
 fi
